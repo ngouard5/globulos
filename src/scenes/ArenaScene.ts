@@ -141,7 +141,9 @@ export class ArenaScene extends Phaser.Scene {
       const moves: Move[] = this.globulos
         .filter((g) => g.team === this.myTeam && g.alive)
         .map((g) => ({
-          id: g.id, fx: g.pendingForce?.x ?? 0, fy: g.pendingForce?.y ?? 0,
+          id: g.id,
+          fx: (g.pendingForce?.x ?? 0) / S,
+          fy: (g.pendingForce?.y ?? 0) / S,
         }));
       this.client.send({ type: 'submit', moves });
     }
@@ -165,13 +167,14 @@ export class ArenaScene extends Phaser.Scene {
 
     this.globulos.forEach((g) => g.clearPendingForce());
 
+    const forceScale = this.isLocal ? 1 : S;
     for (const team of ['red', 'yellow'] as Team[]) {
       const teamMoves = moves[team] ?? [];
       teamMoves.forEach((m) => {
         const g = this.globulos.find(
           (gl) => gl.team === team && gl.id === m.id,
         );
-        if (g?.alive) g.setPendingForce(m.fx, m.fy);
+        if (g?.alive) g.setPendingForce(m.fx * forceScale, m.fy * forceScale);
       });
     }
 

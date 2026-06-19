@@ -9,7 +9,7 @@ export const GAME_CONFIG = {
   arena: {
     centerX: (isMobile ? 300 : 400) * S,
     centerY: (isMobile ? 400 : 300) * S,
-    radius: (isMobile ? 265 : 250) * S,
+    radius: 250 * S,
     pitRadius: 80 * S,
   },
 
