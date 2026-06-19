@@ -14,7 +14,6 @@ function getWsUrl(): string {
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${wsProtocol}//${window.location.host}`;
 }
-const WS_URL = getWsUrl();
 
 const lobby = document.getElementById('lobby')!;
 const lobbyMenu = document.getElementById('lobby-menu')!;
@@ -22,9 +21,10 @@ const lobbyWaiting = document.getElementById('lobby-waiting')!;
 const lobbyError = document.getElementById('lobby-error')!;
 const roomCodeEl = document.getElementById('room-code')!;
 const roomInput = document.getElementById('room-input') as HTMLInputElement;
-const btnCreate = document.getElementById('btn-create')!;
-const btnJoin = document.getElementById('btn-join')!;
+const btnCreate = document.getElementById('btn-create') as HTMLButtonElement;
+const btnJoin = document.getElementById('btn-join') as HTMLButtonElement;
 const btnLocal = document.getElementById('btn-local')!;
+const onlineStatus = document.getElementById('online-status')!;
 const appEl = document.getElementById('app')!;
 
 const lobbyBg = document.getElementById('lobby-bg') as HTMLCanvasElement;
@@ -66,18 +66,28 @@ function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
   }
 }
 
+function setOnlineEnabled(enabled: boolean) {
+  btnCreate.disabled = !enabled;
+  btnJoin.disabled = !enabled;
+  roomInput.disabled = !enabled;
+}
+
+// ── Local ──
 btnLocal.addEventListener('click', () => {
-  const localClient = new LocalClient();
-  launchGame('red', localClient, true);
+  launchGame('red', new LocalClient(), true);
 });
 
+// ── Online ──
 async function init() {
   const client = new Client();
 
   try {
-    await client.connect(WS_URL);
+    await client.connect(getWsUrl());
+    onlineStatus.textContent = '';
+    setOnlineEnabled(true);
   } catch {
-    lobbyError.textContent = 'Impossible de se connecter au serveur';
+    onlineStatus.innerHTML = 'Serveur indisponible';
+    onlineStatus.classList.add('offline-msg');
     return;
   }
 
