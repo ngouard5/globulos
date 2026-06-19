@@ -1,0 +1,23 @@
+{
+  "name": "globulos",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "server": "node server.js",
+    "start": "node server.js",
+    "build": "npm run build:client",
+    "build:client": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "phaser": "^4.1.0",
+    "ws": "^8.21.0"
+  }
+}

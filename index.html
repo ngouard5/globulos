@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>globulos</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      body {
+        background: #3b7a24;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: Georgia, serif;
+        color: #fff8e8;
+      }
+      #lobby {
+        text-align: center;
+        background: rgba(0,0,0,0.25);
+        padding: 48px 40px;
+        border-radius: 20px;
+        border: 3px solid rgba(255,255,255,0.1);
+      }
+      #lobby h1 {
+        font-size: 52px;
+        margin-bottom: 32px;
+        text-shadow: 3px 3px 0 #2a5a14;
+        letter-spacing: 2px;
+      }
+      #lobby button {
+        font-family: Georgia, serif;
+        font-size: 18px;
+        font-weight: bold;
+        padding: 12px 28px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #8b5e30;
+        color: #fff8e8;
+        box-shadow: 0 4px 0 #5a3818, 0 6px 12px rgba(0,0,0,0.3);
+        text-shadow: 1px 1px 0 #5a3a18;
+        transition: transform 0.1s, box-shadow 0.1s;
+      }
+      #lobby button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 0 #5a3818, 0 8px 16px rgba(0,0,0,0.35);
+      }
+      #lobby button:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 #5a3818, 0 3px 8px rgba(0,0,0,0.3);
+      }
+      #lobby input {
+        font-family: Georgia, serif;
+        font-size: 28px;
+        text-align: center;
+        letter-spacing: 8px;
+        padding: 10px 16px;
+        width: 160px;
+        border: 2px solid #5a3818;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.15);
+        color: #fff8e8;
+        outline: none;
+        text-transform: uppercase;
+      }
+      #lobby input::placeholder {
+        color: rgba(255,248,232,0.4);
+        letter-spacing: 4px;
+        font-size: 18px;
+      }
+      #lobby .separator {
+        margin: 20px 0;
+        color: rgba(255,248,232,0.4);
+        font-size: 14px;
+      }
+      #lobby .join-row {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        align-items: center;
+      }
+      #lobby-waiting { display: none; }
+      #room-code {
+        font-size: 52px;
+        letter-spacing: 12px;
+        font-weight: bold;
+        margin: 12px 0;
+        text-shadow: 2px 2px 0 #5a3a18;
+      }
+      #lobby-error {
+        color: #ff8888;
+        margin-top: 16px;
+        min-height: 1.2em;
+      }
+      .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,248,232,0.3);
+        border-top-color: #fff8e8;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="lobby">
+      <h1>Globulos</h1>
+      <div id="lobby-menu">
+        <button id="btn-create">Créer une partie</button>
+        <div class="separator">— ou —</div>
+        <div class="join-row">
+          <input id="room-input" maxlength="4" placeholder="CODE" />
+          <button id="btn-join">Rejoindre</button>
+        </div>
+      </div>
+      <div id="lobby-waiting">
+        <p>Code de la partie :</p>
+        <p id="room-code"></p>
+        <p><span class="spinner"></span>En attente d'un adversaire...</p>
+      </div>
+      <p id="lobby-error"></p>
+    </div>
+    <div id="app" style="display:none;"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
