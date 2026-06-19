@@ -3,6 +3,8 @@ import { GAME_CONFIG } from '../config/game';
 
 export type Team = 'red' | 'yellow';
 
+const S = GAME_CONFIG.scale;
+
 export class Globulo {
   scene: Phaser.Scene;
   body: MatterJS.BodyType;
@@ -41,43 +43,36 @@ export class Globulo {
     const r = GAME_CONFIG.globulo.radius;
     this.graphics.clear();
 
-    // Drop shadow
     this.graphics.fillStyle(0x000000, 0.22);
-    this.graphics.fillCircle(3, 5, r);
+    this.graphics.fillCircle(3 * S, 5 * S, r);
 
-    // Spiky/bumpy border
     const numSpikes = 11;
     const dark = this.darkenColor(color, 0.58);
     this.graphics.fillStyle(dark, 1);
     const spikePoints: { x: number; y: number }[] = [];
     for (let i = 0; i < numSpikes * 2; i++) {
       const angle = (i / (numSpikes * 2)) * Math.PI * 2;
-      const rad = i % 2 === 0 ? r + 3.5 : r - 1;
+      const rad = i % 2 === 0 ? r + 3.5 * S : r - 1 * S;
       spikePoints.push({ x: Math.cos(angle) * rad, y: Math.sin(angle) * rad });
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.graphics.fillPoints(spikePoints as any, true);
 
-    // Main body
     this.graphics.fillStyle(color, 1);
     this.graphics.fillCircle(0, 0, r);
 
-    // Specular highlight (top-left shine)
     this.graphics.fillStyle(0xffffff, 0.32);
     this.graphics.fillEllipse(-r * 0.26, -r * 0.32, r * 0.62, r * 0.42);
 
-    // Eyes — whites
     this.graphics.fillStyle(0xffffff, 1);
-    this.graphics.fillCircle(-5, -4, 5);
-    this.graphics.fillCircle(5, -4, 5);
-    // Pupils
+    this.graphics.fillCircle(-5 * S, -4 * S, 5 * S);
+    this.graphics.fillCircle(5 * S, -4 * S, 5 * S);
     this.graphics.fillStyle(0x111111, 1);
-    this.graphics.fillCircle(-4, -3.5, 2.8);
-    this.graphics.fillCircle(6, -3.5, 2.8);
-    // Eye shine
+    this.graphics.fillCircle(-4 * S, -3.5 * S, 2.8 * S);
+    this.graphics.fillCircle(6 * S, -3.5 * S, 2.8 * S);
     this.graphics.fillStyle(0xffffff, 0.85);
-    this.graphics.fillCircle(-2.8, -5, 1.1);
-    this.graphics.fillCircle(7.2, -5, 1.1);
+    this.graphics.fillCircle(-2.8 * S, -5 * S, 1.1 * S);
+    this.graphics.fillCircle(7.2 * S, -5 * S, 1.1 * S);
   }
 
   private darkenColor(color: number, factor: number): number {
@@ -113,42 +108,37 @@ export class Globulo {
     const endY = pos.y + Math.sin(angle) * clampedLen;
 
     const teamColor = GAME_CONFIG.teams[this.team].color;
-    const headLen = 16;
+    const headLen = 16 * S;
     const a1 = angle - 0.42;
     const a2 = angle + 0.42;
 
     this.arrowGraphics.clear();
 
-    // --- Ombre portée (décalage + flou simulé) ---
-    this.arrowGraphics.lineStyle(8, 0x000000, 0.18);
+    this.arrowGraphics.lineStyle(8 * S, 0x000000, 0.18);
     this.arrowGraphics.beginPath();
-    this.arrowGraphics.moveTo(pos.x + 3, pos.y + 4);
-    this.arrowGraphics.lineTo(endX + 3, endY + 4);
+    this.arrowGraphics.moveTo(pos.x + 3 * S, pos.y + 4 * S);
+    this.arrowGraphics.lineTo(endX + 3 * S, endY + 4 * S);
     this.arrowGraphics.strokePath();
 
-    // --- Contour sombre du trait ---
-    this.arrowGraphics.lineStyle(7, 0x000000, 0.55);
+    this.arrowGraphics.lineStyle(7 * S, 0x000000, 0.55);
     this.arrowGraphics.beginPath();
     this.arrowGraphics.moveTo(pos.x, pos.y);
     this.arrowGraphics.lineTo(endX, endY);
     this.arrowGraphics.strokePath();
 
-    // --- Trait coloré (couleur équipe) ---
-    this.arrowGraphics.lineStyle(4, teamColor, 0.95);
+    this.arrowGraphics.lineStyle(4 * S, teamColor, 0.95);
     this.arrowGraphics.beginPath();
     this.arrowGraphics.moveTo(pos.x, pos.y);
     this.arrowGraphics.lineTo(endX, endY);
     this.arrowGraphics.strokePath();
 
-    // --- Contour de la pointe ---
     this.arrowGraphics.fillStyle(0x000000, 0.65);
     this.arrowGraphics.fillTriangle(
       endX, endY,
-      endX - (headLen + 4) * Math.cos(a1), endY - (headLen + 4) * Math.sin(a1),
-      endX - (headLen + 4) * Math.cos(a2), endY - (headLen + 4) * Math.sin(a2),
+      endX - (headLen + 4 * S) * Math.cos(a1), endY - (headLen + 4 * S) * Math.sin(a1),
+      endX - (headLen + 4 * S) * Math.cos(a2), endY - (headLen + 4 * S) * Math.sin(a2),
     );
 
-    // --- Pointe colorée ---
     this.arrowGraphics.fillStyle(teamColor, 1);
     this.arrowGraphics.fillTriangle(
       endX, endY,
@@ -184,7 +174,6 @@ export class Globulo {
     const scale = GAME_CONFIG.turn.maxForce / GAME_CONFIG.turn.arrowMaxLength;
     const vx = this._pendingForce.x * scale;
     const vy = this._pendingForce.y * scale;
-    // Use Matter.js Body.setVelocity via Phaser's internal Matter reference
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const MatterBody = (Phaser.Physics.Matter as any).Matter.Body;
     MatterBody.setVelocity(this.body, { x: vx, y: vy });
@@ -197,7 +186,6 @@ export class Globulo {
     this.arrowGraphics.destroy();
     this.scene.matter.world.remove(this.body);
 
-    // Spin + shrink into the pit
     this.scene.tweens.add({
       targets: this.graphics,
       rotation: Math.PI * 4,
@@ -206,9 +194,8 @@ export class Globulo {
       duration: 550,
       ease: 'Quad.In',
       onComplete: () => {
-        // Land at a random spot inside the pit
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 28;
+        const dist = Math.random() * 28 * S;
         this.graphics.setPosition(
           pitX + Math.cos(angle) * dist,
           pitY + Math.sin(angle) * dist,
@@ -225,24 +212,20 @@ export class Globulo {
     const color = GAME_CONFIG.teams[this.team].color;
     this.graphics.clear();
 
-    // Corps légèrement assombri
     this.graphics.fillStyle(color, 0.65);
     this.graphics.fillCircle(0, 0, r);
-    this.graphics.lineStyle(2, 0x000000, 0.3);
+    this.graphics.lineStyle(2.5 * S, 0x000000, 0.3);
     this.graphics.strokeCircle(0, 0, r);
 
-    // Yeux en X
-    this.graphics.lineStyle(2.5, 0x000000, 1);
-    const s = 4;
-    // X gauche
+    this.graphics.lineStyle(2.5 * S, 0x000000, 1);
+    const s = 4 * S;
     this.graphics.beginPath();
-    this.graphics.moveTo(-7 - s, -6 - s); this.graphics.lineTo(-7 + s, -6 + s);
-    this.graphics.moveTo(-7 + s, -6 - s); this.graphics.lineTo(-7 - s, -6 + s);
+    this.graphics.moveTo(-7 * S - s, -6 * S - s); this.graphics.lineTo(-7 * S + s, -6 * S + s);
+    this.graphics.moveTo(-7 * S + s, -6 * S - s); this.graphics.lineTo(-7 * S - s, -6 * S + s);
     this.graphics.strokePath();
-    // X droit
     this.graphics.beginPath();
-    this.graphics.moveTo(7 - s, -6 - s); this.graphics.lineTo(7 + s, -6 + s);
-    this.graphics.moveTo(7 + s, -6 - s); this.graphics.lineTo(7 - s, -6 + s);
+    this.graphics.moveTo(7 * S - s, -6 * S - s); this.graphics.lineTo(7 * S + s, -6 * S + s);
+    this.graphics.moveTo(7 * S + s, -6 * S - s); this.graphics.lineTo(7 * S - s, -6 * S + s);
     this.graphics.strokePath();
   }
 

@@ -1,16 +1,20 @@
+const S = Math.min(window.devicePixelRatio ?? 1, 2);
+const isMobile = window.innerHeight > window.innerWidth;
+
 export const GAME_CONFIG = {
-  width: 800,
-  height: 600,
+  width: (isMobile ? 600 : 800) * S,
+  height: (isMobile ? 960 : 660) * S,
+  isMobile,
 
   arena: {
-    centerX: 400,
-    centerY: 300,
-    radius: 250,
-    pitRadius: 80,
+    centerX: (isMobile ? 300 : 400) * S,
+    centerY: (isMobile ? 400 : 300) * S,
+    radius: (isMobile ? 265 : 250) * S,
+    pitRadius: 80 * S,
   },
 
   globulo: {
-    radius: 18,
+    radius: 18 * S,
     mass: 1,
     friction: 0.02,
     frictionAir: 0.03,
@@ -23,7 +27,9 @@ export const GAME_CONFIG = {
   },
 
   turn: {
-    maxForce: 12,
-    arrowMaxLength: 100,
+    maxForce: 12 * S,
+    arrowMaxLength: 100 * S,
   },
+
+  scale: S,
 };

@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { ArenaScene } from './scenes/ArenaScene';
 import { GAME_CONFIG } from './config/game';
 import { Client } from './network/Client';
+import { LocalClient } from './network/LocalClient';
+import { drawLobbyBackground } from './lobbyBg';
 import type { Team } from './entities/Globulo';
 
 function getWsUrl(): string {
@@ -22,12 +24,17 @@ const roomCodeEl = document.getElementById('room-code')!;
 const roomInput = document.getElementById('room-input') as HTMLInputElement;
 const btnCreate = document.getElementById('btn-create')!;
 const btnJoin = document.getElementById('btn-join')!;
+const btnLocal = document.getElementById('btn-local')!;
 const appEl = document.getElementById('app')!;
 
-const client = new Client();
+const lobbyBg = document.getElementById('lobby-bg') as HTMLCanvasElement;
+drawLobbyBackground(lobbyBg);
 
-function startGame(team: Team) {
+type GameClient = Client | LocalClient;
+
+function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
   lobby.style.display = 'none';
+  lobbyBg.style.display = 'none';
   appEl.style.display = 'block';
 
   new Phaser.Game({
@@ -37,10 +44,7 @@ function startGame(team: Team) {
     backgroundColor: '#3b7a24',
     physics: {
       default: 'matter',
-      matter: {
-        gravity: { x: 0, y: 0 },
-        debug: false,
-      },
+      matter: { gravity: { x: 0, y: 0 }, debug: false },
     },
     scene: [ArenaScene],
     parent: 'app',
@@ -51,13 +55,25 @@ function startGame(team: Team) {
     callbacks: {
       preBoot: (game) => {
         game.registry.set('team', team);
-        game.registry.set('client', client);
+        game.registry.set('client', gameClient);
+        game.registry.set('isLocal', isLocal);
       },
     },
   });
+
+  if (gameClient instanceof LocalClient) {
+    gameClient.start();
+  }
 }
 
+btnLocal.addEventListener('click', () => {
+  const localClient = new LocalClient();
+  launchGame('red', localClient, true);
+});
+
 async function init() {
+  const client = new Client();
+
   try {
     await client.connect(WS_URL);
   } catch {
@@ -95,7 +111,7 @@ async function init() {
   });
 
   client.on('game-start', (data) => {
-    startGame(data.team as Team);
+    launchGame(data.team as Team, client, false);
   });
 
   client.on('opponent-disconnected', () => {

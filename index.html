@@ -33,23 +33,42 @@
         font-family: Georgia, serif;
         font-size: 18px;
         font-weight: bold;
-        padding: 12px 28px;
-        border: none;
+        padding: 14px 32px;
+        border: 2px solid #5a3818;
         border-radius: 10px;
         cursor: pointer;
-        background: #8b5e30;
         color: #fff8e8;
-        box-shadow: 0 4px 0 #5a3818, 0 6px 12px rgba(0,0,0,0.3);
         text-shadow: 1px 1px 0 #5a3a18;
         transition: transform 0.1s, box-shadow 0.1s;
+        background:
+          linear-gradient(180deg, #b8884a 0%, #b8884a 6px, transparent 6px),
+          linear-gradient(180deg, transparent calc(100% - 6px), #6a4420 calc(100% - 6px)),
+          repeating-linear-gradient(
+            180deg,
+            transparent,
+            transparent 8px,
+            rgba(112,64,32,0.12) 8px,
+            rgba(112,64,32,0.12) 9px
+          ),
+          linear-gradient(180deg, #9b6b36, #8b5e30);
+        box-shadow:
+          0 4px 0 #5a3818,
+          0 6px 12px rgba(0,0,0,0.35),
+          inset 0 1px 0 rgba(212,168,106,0.25);
       }
       #lobby button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 5px 0 #5a3818, 0 8px 16px rgba(0,0,0,0.35);
+        box-shadow:
+          0 5px 0 #5a3818,
+          0 8px 16px rgba(0,0,0,0.4),
+          inset 0 1px 0 rgba(212,168,106,0.3);
       }
       #lobby button:active {
-        transform: translateY(2px);
-        box-shadow: 0 2px 0 #5a3818, 0 3px 8px rgba(0,0,0,0.3);
+        transform: translateY(3px);
+        box-shadow:
+          0 1px 0 #5a3818,
+          0 2px 6px rgba(0,0,0,0.3),
+          inset 0 1px 0 rgba(212,168,106,0.15);
       }
       #lobby input {
         font-family: Georgia, serif;
@@ -60,10 +79,15 @@
         width: 160px;
         border: 2px solid #5a3818;
         border-radius: 10px;
-        background: rgba(255,255,255,0.15);
+        background: rgba(139,94,48,0.35);
         color: #fff8e8;
         outline: none;
         text-transform: uppercase;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.25), 0 1px 0 rgba(212,168,106,0.15);
+      }
+      #lobby input:focus {
+        border-color: #b8884a;
+        background: rgba(139,94,48,0.5);
       }
       #lobby input::placeholder {
         color: rgba(255,248,232,0.4);
@@ -109,9 +133,12 @@
     </style>
   </head>
   <body>
-    <div id="lobby">
+    <canvas id="lobby-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;"></canvas>
+    <div id="lobby" style="position:relative;z-index:1;">
       <h1>Globulos</h1>
       <div id="lobby-menu">
+        <button id="btn-local">Partie locale</button>
+        <div class="separator">— en ligne —</div>
         <button id="btn-create">Créer une partie</button>
         <div class="separator">— ou —</div>
         <div class="join-row">
