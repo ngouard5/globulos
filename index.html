@@ -3,17 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>globulos</title>
     <style>
       * { box-sizing: border-box; margin: 0; }
       body {
-        background: #3b7a24;
+        background: #c7f554;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
-        font-family: Georgia, serif;
+        font-family: 'Fredoka', sans-serif;
         color: #fff8e8;
       }
       #lobby {
@@ -22,17 +25,27 @@
         max-width: 420px;
         width: 90%;
       }
-      #lobby h1 {
-        font-size: 52px;
-        margin-bottom: 28px;
-        text-shadow: 3px 3px 0 #2a5a14;
-        letter-spacing: 2px;
+      .logo-panel {
+        background:
+          linear-gradient(180deg, #b8884a 0%, #b8884a 6px, transparent 6px),
+          linear-gradient(180deg, transparent calc(100% - 6px), #6a4420 calc(100% - 6px)),
+          linear-gradient(180deg, #9b6b36, #8b5e30);
+        border: 2px solid #5a3818;
+        border-radius: 14px;
+        padding: 14px 24px 10px;
+        margin-bottom: 22px;
+        box-shadow: 0 5px 0 #5a3818, 0 8px 16px rgba(0,0,0,0.3);
+        display: inline-block;
+      }
+      .logo-img {
+        max-width: 100%;
+        display: block;
       }
 
       /* ── Sections ── */
       .lobby-section {
-        background: rgba(0,0,0,0.22);
-        border: 2px solid rgba(255,255,255,0.08);
+        background: rgba(0,0,0,0.35);
+        border: 2px solid rgba(255,255,255,0.1);
         border-radius: 16px;
         padding: 20px 22px;
         margin-bottom: 14px;
@@ -41,20 +54,20 @@
         font-size: 15px;
         text-transform: uppercase;
         letter-spacing: 3px;
-        color: rgba(255,248,232,0.5);
+        color: rgba(255,248,232,0.7);
         margin-bottom: 14px;
         font-weight: normal;
       }
       .lobby-section .desc {
         font-size: 13px;
-        color: rgba(255,248,232,0.45);
+        color: rgba(255,248,232,0.65);
         margin-top: 10px;
         line-height: 1.4;
       }
 
       /* ── Buttons ── */
       #lobby button {
-        font-family: Georgia, serif;
+        font-family: 'Fredoka', sans-serif;
         font-size: 18px;
         font-weight: bold;
         padding: 14px 32px;
@@ -94,7 +107,7 @@
       /* ── Online section ── */
       .online-actions { display: flex; flex-direction: column; gap: 12px; align-items: center; }
       .online-divider {
-        color: rgba(255,248,232,0.3);
+        color: rgba(255,248,232,0.5);
         font-size: 13px;
         margin: 2px 0;
       }
@@ -106,7 +119,7 @@
         width: 100%;
       }
       #lobby input {
-        font-family: Georgia, serif;
+        font-family: 'Fredoka', sans-serif;
         font-size: 24px;
         text-align: center;
         letter-spacing: 6px;
@@ -160,7 +173,9 @@
   <body>
     <canvas id="lobby-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;"></canvas>
     <div id="lobby" style="position:relative;z-index:1;">
-      <h1>Globulos</h1>
+      <div class="logo-panel">
+        <img src="/logo.svg" alt="Globulos" class="logo-img" />
+      </div>
 
       <div id="lobby-menu">
         <!-- Local -->

@@ -100,7 +100,17 @@ wss.on('connection', (ws) => {
         room.players.forEach((p) => {
           send(p.ws, { type: 'game-start', team: p.team });
         });
-        setTimeout(() => startRound(room), 500);
+        room.playersReady = 0;
+        break;
+      }
+
+      case 'player-ready': {
+        if (!playerRoom) return;
+        playerRoom.playersReady = (playerRoom.playersReady || 0) + 1;
+        if (playerRoom.playersReady >= 2) {
+          broadcast(playerRoom, { type: 'both-ready' });
+          setTimeout(() => startRound(playerRoom), 500);
+        }
         break;
       }
 

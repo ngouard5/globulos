@@ -3,7 +3,7 @@ import { ArenaScene } from './scenes/ArenaScene';
 import { GAME_CONFIG } from './config/game';
 import { Client } from './network/Client';
 import { LocalClient } from './network/LocalClient';
-import { drawLobbyBackground } from './lobbyBg';
+import { drawLobbyBackground, stopLobbyAnimation } from './lobbyBg';
 import type { Team } from './entities/Globulo';
 
 function getWsUrl(): string {
@@ -33,6 +33,7 @@ drawLobbyBackground(lobbyBg);
 type GameClient = Client | LocalClient;
 
 function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
+  stopLobbyAnimation();
   lobby.style.display = 'none';
   lobbyBg.style.display = 'none';
   appEl.style.display = 'block';
@@ -41,7 +42,7 @@ function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
     type: Phaser.AUTO,
     width: GAME_CONFIG.width,
     height: GAME_CONFIG.height,
-    backgroundColor: '#3b7a24',
+    backgroundColor: '#c7f554',
     physics: {
       default: 'matter',
       matter: { gravity: { x: 0, y: 0 }, debug: false },
@@ -61,9 +62,7 @@ function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
     },
   });
 
-  if (gameClient instanceof LocalClient) {
-    gameClient.start();
-  }
+  // Local start is handled by ArenaScene.startGame() after ready screen
 }
 
 function setOnlineEnabled(enabled: boolean) {
