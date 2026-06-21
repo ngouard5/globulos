@@ -22,8 +22,8 @@ export const GAME_CONFIG = {
   },
 
   teams: {
-    red: { color: 0xe84444, count: 3 },
-    yellow: { color: 0xf5c842, count: 3 },
+    red: { color: 0xe84444, count: 4 },
+    yellow: { color: 0xf5c842, count: 4 },
   },
 
   turn: {

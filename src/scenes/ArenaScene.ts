@@ -551,16 +551,20 @@ export class ArenaScene extends Phaser.Scene {
     const { centerX, centerY, radius, pitRadius } = GAME_CONFIG.arena;
     const safeRadius = (radius + pitRadius) / 2;
 
+    const sp = 42 * S;
+    const rx = safeRadius * 0.9;
     const positions: Record<Team, { x: number; y: number }[]> = {
       red: [
-        { x: centerX + safeRadius * 0.6, y: centerY - 60 * S },
-        { x: centerX + safeRadius * 0.6, y: centerY },
-        { x: centerX + safeRadius * 0.6, y: centerY + 60 * S },
+        { x: centerX + rx, y: centerY - sp },
+        { x: centerX + rx + sp * 0.7, y: centerY },
+        { x: centerX + rx, y: centerY + sp },
+        { x: centerX + rx - sp * 0.7, y: centerY },
       ],
       yellow: [
-        { x: centerX - safeRadius * 0.6, y: centerY - 60 * S },
-        { x: centerX - safeRadius * 0.6, y: centerY },
-        { x: centerX - safeRadius * 0.6, y: centerY + 60 * S },
+        { x: centerX - rx, y: centerY - sp },
+        { x: centerX - rx + sp * 0.7, y: centerY },
+        { x: centerX - rx, y: centerY + sp },
+        { x: centerX - rx - sp * 0.7, y: centerY },
       ],
     };
 
@@ -679,13 +683,13 @@ export class ArenaScene extends Phaser.Scene {
 
     const globR = 22 * M;
     this.drawMiniGlobulo(topBarBg, 55 * S, topBarY, GAME_CONFIG.teams.red.color, true, globR);
-    this.scoreRed = this.add.text(100 * S, topBarY, '3', {
+    this.scoreRed = this.add.text(100 * S, topBarY, '4', {
       fontSize: `${48 * S}px`, fontFamily: 'Fredoka, sans-serif', fontStyle: 'bold',
       color: '#fff8e8', stroke: '#5a3a18', strokeThickness: 4 * S,
     }).setOrigin(0, 0.5);
 
     this.drawMiniGlobulo(topBarBg, W - 55 * S, topBarY, GAME_CONFIG.teams.yellow.color, true, globR);
-    this.scoreYellow = this.add.text(W - 100 * S, topBarY, '3', {
+    this.scoreYellow = this.add.text(W - 100 * S, topBarY, '4', {
       fontSize: `${48 * S}px`, fontFamily: 'Fredoka, sans-serif', fontStyle: 'bold',
       color: '#fff8e8', stroke: '#5a3a18', strokeThickness: 4 * S,
     }).setOrigin(1, 0.5);
@@ -738,12 +742,12 @@ export class ArenaScene extends Phaser.Scene {
     const cy = H / 2;
     const panelCx = 46 * S;
 
-    this.scoreRed = this.add.text(panelCx, cy + 26 * S, '3', {
+    this.scoreRed = this.add.text(panelCx, cy + 26 * S, '4', {
       fontSize: `${44 * S}px`, fontFamily: 'Fredoka, sans-serif', fontStyle: 'bold',
       color: '#fff8e8', stroke: '#5a3a18', strokeThickness: 4 * S,
     }).setOrigin(0.5);
 
-    this.scoreYellow = this.add.text(W - panelCx, cy + 26 * S, '3', {
+    this.scoreYellow = this.add.text(W - panelCx, cy + 26 * S, '4', {
       fontSize: `${44 * S}px`, fontFamily: 'Fredoka, sans-serif', fontStyle: 'bold',
       color: '#fff8e8', stroke: '#5a3a18', strokeThickness: 4 * S,
     }).setOrigin(0.5);

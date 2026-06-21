@@ -90,6 +90,13 @@ async function init() {
     return;
   }
 
+  // Auto-join if ?room= is in the URL
+  const urlRoom = new URLSearchParams(window.location.search).get('room');
+  if (urlRoom && urlRoom.length >= 4) {
+    window.history.replaceState({}, '', window.location.pathname);
+    client.send({ type: 'join', room: urlRoom });
+  }
+
   btnCreate.addEventListener('click', () => {
     lobbyError.textContent = '';
     client.send({ type: 'create' });
@@ -110,9 +117,21 @@ async function init() {
   });
 
   client.on('room-created', (data) => {
-    roomCodeEl.textContent = data.room as string;
+    const code = data.room as string;
+    roomCodeEl.textContent = code;
     lobbyMenu.style.display = 'none';
     lobbyWaiting.style.display = 'block';
+
+    const joinUrl = `${window.location.origin}?room=${code}`;
+    const linkEl = document.getElementById('room-link') as HTMLInputElement;
+    linkEl.value = joinUrl;
+    linkEl.style.display = 'block';
+    linkEl.addEventListener('click', () => {
+      linkEl.select();
+      navigator.clipboard.writeText(joinUrl);
+      linkEl.value = 'Copié !';
+      setTimeout(() => { linkEl.value = joinUrl; }, 1500);
+    });
   });
 
   client.on('error', (data) => {
