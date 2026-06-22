@@ -24,7 +24,9 @@ export class Client {
       this.ws.onopen = () => resolve();
       this.ws.onerror = () => reject();
       this.ws.onmessage = (e) => {
-        const msg = JSON.parse(e.data as string);
+        let msg;
+        try { msg = JSON.parse(e.data as string); } catch { return; }
+        if (!msg || typeof msg.type !== 'string') return;
         const handlers = this.handlers.get(msg.type);
         if (handlers) handlers.forEach((h) => h(msg));
       };

@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import { ArenaScene } from './scenes/ArenaScene';
+import { FootballScene } from './scenes/FootballScene';
 import { GAME_CONFIG } from './config/game';
 import { Client } from './network/Client';
 import { LocalClient } from './network/LocalClient';
 import { drawLobbyBackground, stopLobbyAnimation } from './lobbyBg';
 import type { Team } from './entities/Globulo';
+
+type GameMode = 'arena' | 'football';
 
 function getWsUrl(): string {
   const envUrl = import.meta.env.VITE_WS_URL as string | undefined;
@@ -32,11 +35,24 @@ drawLobbyBackground(lobbyBg);
 
 type GameClient = Client | LocalClient;
 
-function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
+let selectedMode: GameMode = 'arena';
+
+// ── Mode selector ──
+document.querySelectorAll('.mode-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedMode = (btn as HTMLElement).dataset.mode as GameMode;
+  });
+});
+
+function launchGame(team: Team, gameClient: GameClient, isLocal: boolean, mode: GameMode) {
   stopLobbyAnimation();
   lobby.style.display = 'none';
   lobbyBg.style.display = 'none';
   appEl.style.display = 'block';
+
+  const scene = mode === 'football' ? [FootballScene] : [ArenaScene];
 
   new Phaser.Game({
     type: Phaser.AUTO,
@@ -47,7 +63,7 @@ function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
       default: 'matter',
       matter: { gravity: { x: 0, y: 0 }, debug: false },
     },
-    scene: [ArenaScene],
+    scene,
     parent: 'app',
     scale: {
       mode: Phaser.Scale.FIT,
@@ -61,8 +77,6 @@ function launchGame(team: Team, gameClient: GameClient, isLocal: boolean) {
       },
     },
   });
-
-  // Local start is handled by ArenaScene.startGame() after ready screen
 }
 
 function setOnlineEnabled(enabled: boolean) {
@@ -73,7 +87,7 @@ function setOnlineEnabled(enabled: boolean) {
 
 // ── Local ──
 btnLocal.addEventListener('click', () => {
-  launchGame('red', new LocalClient(), true);
+  launchGame('red', new LocalClient(), true, selectedMode);
 });
 
 // ── Online ──
@@ -90,7 +104,6 @@ async function init() {
     return;
   }
 
-  // Auto-join if ?room= is in the URL
   const urlRoom = new URLSearchParams(window.location.search).get('room');
   if (urlRoom && urlRoom.length >= 4) {
     window.history.replaceState({}, '', window.location.pathname);
@@ -99,7 +112,7 @@ async function init() {
 
   btnCreate.addEventListener('click', () => {
     lobbyError.textContent = '';
-    client.send({ type: 'create' });
+    client.send({ type: 'create', mode: selectedMode });
   });
 
   btnJoin.addEventListener('click', () => {
@@ -139,7 +152,8 @@ async function init() {
   });
 
   client.on('game-start', (data) => {
-    launchGame(data.team as Team, client, false);
+    const mode = (data.mode as GameMode) || 'arena';
+    launchGame(data.team as Team, client, false, mode);
   });
 
   client.on('opponent-disconnected', () => {

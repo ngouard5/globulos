@@ -98,6 +98,19 @@
         padding: 16px 32px;
       }
       #btn-create { width: 100%; }
+      .mode-toggle {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .mode-btn {
+        flex: 1;
+        font-size: 16px !important;
+        padding: 10px 16px !important;
+      }
+      .mode-btn.active {
+        box-shadow: 0 4px 0 #5a3818, 0 6px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(212,168,106,0.25), 0 0 8px 3px #ffd167 !important;
+      }
       button:disabled {
         opacity: 0.4;
         cursor: default;
@@ -178,6 +191,15 @@
       </div>
 
       <div id="lobby-menu">
+        <!-- Mode selector -->
+        <div class="lobby-section">
+          <h2>Mode de jeu</h2>
+          <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="arena">Arène</button>
+            <button class="mode-btn" data-mode="football">Football</button>
+          </div>
+        </div>
+
         <!-- Local -->
         <div class="lobby-section">
           <h2>Même écran</h2>

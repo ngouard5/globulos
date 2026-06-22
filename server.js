@@ -7,6 +7,12 @@ import { dirname, join } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3001;
 
+const MAX_ROOMS = 500;
+const MAX_MOVES_PER_TEAM = 6;
+const MAX_FORCE = 500;
+const RATE_LIMIT_WINDOW = 1000;
+const RATE_LIMIT_MAX = 15;
+
 const app = express();
 app.use(express.static(join(__dirname, 'dist')));
 app.get('/{*splat}', (_req, res) => {
@@ -14,15 +20,43 @@ app.get('/{*splat}', (_req, res) => {
 });
 
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ server, maxPayload: 4096 });
 const rooms = new Map();
 
 function generateCode() {
+  if (rooms.size >= MAX_ROOMS) return null;
   let code;
+  let attempts = 0;
   do {
     code = Math.random().toString(36).substring(2, 6).toUpperCase();
+    attempts++;
+    if (attempts > 100) return null;
   } while (rooms.has(code));
   return code;
+}
+
+function validateMoves(moves) {
+  if (!Array.isArray(moves)) return [];
+  const valid = [];
+  for (let i = 0; i < Math.min(moves.length, MAX_MOVES_PER_TEAM); i++) {
+    const m = moves[i];
+    if (
+      m &&
+      typeof m === 'object' &&
+      typeof m.id === 'number' &&
+      typeof m.fx === 'number' &&
+      typeof m.fy === 'number' &&
+      Number.isFinite(m.fx) &&
+      Number.isFinite(m.fy)
+    ) {
+      valid.push({
+        id: m.id,
+        fx: Math.max(-MAX_FORCE, Math.min(MAX_FORCE, m.fx)),
+        fy: Math.max(-MAX_FORCE, Math.min(MAX_FORCE, m.fy)),
+      });
+    }
+  }
+  return valid;
 }
 
 function send(ws, msg) {
@@ -54,11 +88,27 @@ function resolveRound(room) {
   broadcast(room, { type: 'resolve', moves: room.moves });
 }
 
+function cleanupRoom(room) {
+  if (room.timer) clearTimeout(room.timer);
+  rooms.delete(room.code);
+}
+
 wss.on('connection', (ws) => {
   let playerRoom = null;
   let playerTeam = null;
+  let msgCount = 0;
+  let msgWindowStart = Date.now();
 
   ws.on('message', (raw) => {
+    // Rate limiting
+    const now = Date.now();
+    if (now - msgWindowStart > RATE_LIMIT_WINDOW) {
+      msgCount = 0;
+      msgWindowStart = now;
+    }
+    msgCount++;
+    if (msgCount > RATE_LIMIT_MAX) return;
+
     let msg;
     try {
       msg = JSON.parse(raw);
@@ -66,11 +116,27 @@ wss.on('connection', (ws) => {
       return;
     }
 
+    if (!msg || typeof msg.type !== 'string') return;
+
     switch (msg.type) {
       case 'create': {
+        // Cleanup previous room if any
+        if (playerRoom) {
+          const opponent = playerRoom.players.find((p) => p.team !== playerTeam);
+          if (opponent) send(opponent.ws, { type: 'opponent-disconnected' });
+          cleanupRoom(playerRoom);
+          playerRoom = null;
+          playerTeam = null;
+        }
+
         const code = generateCode();
+        if (!code) {
+          send(ws, { type: 'error', message: 'Serveur plein, réessayez plus tard' });
+          return;
+        }
         const room = {
           code,
+          mode: msg.mode || 'arena',
           players: [{ ws, team: 'red' }],
           moves: { red: null, yellow: null },
           timer: null,
@@ -98,7 +164,7 @@ wss.on('connection', (ws) => {
         playerRoom = room;
         playerTeam = 'yellow';
         room.players.forEach((p) => {
-          send(p.ws, { type: 'game-start', team: p.team });
+          send(p.ws, { type: 'game-start', team: p.team, mode: room.mode });
         });
         setTimeout(() => startRound(room), 1000);
         break;
@@ -107,7 +173,7 @@ wss.on('connection', (ws) => {
       case 'submit': {
         if (!playerRoom || playerRoom.phase !== 'planning') return;
         if (playerRoom.moves[playerTeam] !== null) return;
-        playerRoom.moves[playerTeam] = msg.moves || [];
+        playerRoom.moves[playerTeam] = validateMoves(msg.moves);
         const opponent = playerRoom.players.find(
           (p) => p.team !== playerTeam,
         );
@@ -141,10 +207,9 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     if (playerRoom) {
-      if (playerRoom.timer) clearTimeout(playerRoom.timer);
       const opponent = playerRoom.players.find((p) => p.team !== playerTeam);
       if (opponent) send(opponent.ws, { type: 'opponent-disconnected' });
-      rooms.delete(playerRoom.code);
+      cleanupRoom(playerRoom);
     }
   });
 });

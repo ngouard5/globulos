@@ -31,5 +31,24 @@ export const GAME_CONFIG = {
     arrowMaxLength: 100 * S,
   },
 
+  football: {
+    fieldWidth: 500 * S,
+    fieldHeight: 300 * S,
+    centerX: (isMobile ? 300 : 400) * S,
+    centerY: (isMobile ? 400 : 300) * S,
+    goalWidth: 22 * S,
+    goalHeight: 100 * S,
+    wallThickness: 20 * S,
+    ball: {
+      radius: 12 * S,
+      mass: 0.08,
+      friction: 0.01,
+      frictionAir: 0.045,
+      restitution: 0.6,
+    },
+    playersPerTeam: 3,
+    scoreToWin: 3,
+  },
+
   scale: S,
 };
