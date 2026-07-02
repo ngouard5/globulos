@@ -49,6 +49,10 @@ export class FootballScene extends Phaser.Scene {
     super({ key: 'FootballScene' });
   }
 
+  preload() {
+    this.load.svg('field-border', 'football-field-border.svg', { width: 647 * 3, height: 335 * 3 });
+  }
+
   create() {
     this.myTeam = this.game.registry.get('team');
     this.client = this.game.registry.get('client');
@@ -239,31 +243,19 @@ export class FootballScene extends Phaser.Scene {
     g.fillStyle(0xffffff, 0.3);
     g.fillCircle(cx, cy, 4 * S);
 
-    // Wooden border segments around the field
-    const border = this.add.graphics();
-    const bw = fw + 2 * gw + 2 * 14 * S;
-    const bh = 14 * S;
-    // Top border (full width)
-    this.drawWoodButton(border, cx - bw / 2, cy - fh / 2 - bh - 3 * S, bw, bh);
-    // Bottom border (full width)
-    this.drawWoodButton(border, cx - bw / 2, cy + fh / 2 + 3 * S, bw, bh);
-    // Left wall (above goal)
-    const sideH = (fh - gh) / 2;
-    this.drawWoodButton(border, cx - fw / 2 - bh - 3 * S, cy - fh / 2 - 3 * S, bh, sideH + 3 * S);
-    // Left wall (below goal)
-    this.drawWoodButton(border, cx - fw / 2 - bh - 3 * S, cy + gh / 2, bh, sideH + 3 * S);
-    // Right wall (above goal)
-    this.drawWoodButton(border, cx + fw / 2 + 3 * S, cy - fh / 2 - 3 * S, bh, sideH + 3 * S);
-    // Right wall (below goal)
-    this.drawWoodButton(border, cx + fw / 2 + 3 * S, cy + gh / 2, bh, sideH + 3 * S);
-    // Left goal box border (back + top + bottom)
-    this.drawWoodButton(border, cx - fw / 2 - gw - bh - 3 * S, cy - gh / 2 - bh - 3 * S, bh, gh + 2 * bh + 6 * S);
-    this.drawWoodButton(border, cx - fw / 2 - gw - bh - 3 * S, cy - gh / 2 - bh - 3 * S, gw + bh + 3 * S, bh);
-    this.drawWoodButton(border, cx - fw / 2 - gw - bh - 3 * S, cy + gh / 2 + 3 * S, gw + bh + 3 * S, bh);
-    // Right goal box border (back + top + bottom)
-    this.drawWoodButton(border, cx + fw / 2 + gw + 3 * S, cy - gh / 2 - bh - 3 * S, bh, gh + 2 * bh + 6 * S);
-    this.drawWoodButton(border, cx + fw / 2 + 3 * S, cy - gh / 2 - bh - 3 * S, gw + bh + 3 * S, bh);
-    this.drawWoodButton(border, cx + fw / 2 + 3 * S, cy + gh / 2 + 3 * S, gw + bh + 3 * S, bh);
+    // Illustrated border frame (wooden goal posts + sidelines), overlaid on the grass.
+    // The artwork's goal-mouth edges (raw SVG x=76 / x=570 in the 647-wide viewBox) are
+    // calibrated to land exactly on the pitch edges so the drawn goal line matches the
+    // invisible scoring boundary used below.
+    const svgWidth = 647;
+    const svgHeight = 335;
+    const svgLeftLip = 76;
+    const svgRightLip = 570;
+    const borderScale = fw / (svgRightLip - svgLeftLip);
+    const borderW = svgWidth * borderScale;
+    const borderH = svgHeight * borderScale;
+    const borderCenterX = cx - fw / 2 - svgLeftLip * borderScale + borderW / 2;
+    this.add.image(borderCenterX, cy, 'field-border').setDisplaySize(borderW, borderH);
 
     this.createFieldBorder();
   }
@@ -992,15 +984,18 @@ export class FootballScene extends Phaser.Scene {
         }
       });
 
-      // Ball entering a goal
+      // Ball entering a goal — counts once more than half the ball has crossed into the goal mouth
       if (!this.goalScored) {
         const bx = this.ball.body.position.x;
-        if (bx < goalLeftX - gw * 0.3) {
+        const by = this.ball.body.position.y;
+        const inGoalY = by > centerY - gh / 2 && by < centerY + gh / 2;
+
+        if (inGoalY && bx < goalLeftX) {
           this.goalScored = true;
           this.onGoal('yellow');
           return;
         }
-        if (bx > goalRightX + gw * 0.3) {
+        if (inGoalY && bx > goalRightX) {
           this.goalScored = true;
           this.onGoal('red');
           return;
